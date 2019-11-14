@@ -60,14 +60,11 @@ defmodule BeSpiral.Auth do
 
   If no invitation is found we assume the user is being invited to BeSpiral community.
   """
-    with %Invitation{} = invitation <-
-           Repo.get_by(Invitation, id: invitation_id, accepted: false),
   def sign_up(%{"name" => name, "account" => account, "invitation_id" => invitation_id, "email" => email}) do
+    with %Invitation{} = invitation <- Repo.get_by(Invitation, id: invitation_id, accepted: false),
          nil <- Accounts.get_user(account),
-         {:ok, user} <-
-           Accounts.create_user(%{name: name, account: account, email: invitation.invitee_email}),
-         %{transaction_id: _txid} <-
-           @contract.netlink(user.account, invitation.inviter, invitation.community),
+         {:ok, user} <- Accounts.create_user(%{name: name, account: account, email: email}),
+         %{transaction_id: _txid} <- @contract.netlink(user.account, invitation.inviter, invitation.community),
          {:ok, _invitation} <- invitation |> update_invitation(%{accepted: true}) do
       user = user |> Repo.preload(:communities)
       {:ok, user}
