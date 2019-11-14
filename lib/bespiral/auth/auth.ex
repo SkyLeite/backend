@@ -60,9 +60,9 @@ defmodule BeSpiral.Auth do
 
   If no invitation is found we assume the user is being invited to BeSpiral community.
   """
-  def sign_up(%{"name" => name, "account" => account, "invitation_id" => invitation_id}) do
     with %Invitation{} = invitation <-
            Repo.get_by(Invitation, id: invitation_id, accepted: false),
+  def sign_up(%{"name" => name, "account" => account, "invitation_id" => invitation_id, "email" => email}) do
          nil <- Accounts.get_user(account),
          {:ok, user} <-
            Accounts.create_user(%{name: name, account: account, email: invitation.invitee_email}),
